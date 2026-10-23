@@ -29,7 +29,7 @@
 </head>
 <body>
 
-    <video id="vid" playsinline webkit-playsinline preload="auto">
+    <video id="vid" playsinline webkit-playsinline preload="auto" muted>
         <source src="Rick_Roll_Video_Meme_Template_V1.mp4" type="video/mp4">
     </video>
 
@@ -40,25 +40,56 @@
             const vid = document.getElementById('vid');
             const hint = document.getElementById('hint');
             let started = false;
+            let audioCtx = null;
+            let source = null;
+            let gainNode = null;
+            let compressor = null;
+
+            function boostAudio() {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+
+                    audioCtx = new AudioContext();
+                    
+                    source = audioCtx.createMediaElementSource(vid);
+                    
+                    gainNode = audioCtx.createGain();
+                    gainNode.gain.value = 4.0; 
+                    
+                    compressor = audioCtx.createDynamicsCompressor();
+                    compressor.threshold.value = -20; 
+                    compressor.ratio.value = 12; 
+                    
+                    source.connect(gainNode);
+                    gainNode.connect(compressor);
+                    compressor.connect(audioCtx.destination);
+                    
+                    vid.muted = false;
+                    vid.volume = 1;
+
+                } catch (e) {
+                    console.log("Ошибка Web Audio API (возможно, iOS Safari):", e);
+
+                    vid.muted = false;
+                    vid.volume = 1;
+                }
+            }
 
             function start() {
                 if (started) return;
                 started = true;
 
-                vid.muted = false;
-                vid.volume = 1;
+                boostAudio();
 
                 vid.play().then(() => {
                     hint.classList.add('hidden');
                 }).catch((error) => {
-                    console.log("Ошибка автоплея:", error);
-                    vid.muted = true; 
+                    console.log("Ошибка запуска:", error);
+                    vid.muted = true;
                     vid.play().then(() => {
-                        vid.muted = false; 
-                        vid.volume = 1;
+                        vid.muted = false;
                         hint.classList.add('hidden');
-                    }).catch(e => {
-                        console.log("Видео вообще не запустилось", e);
                     });
                 });
             }
