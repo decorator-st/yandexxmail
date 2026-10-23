@@ -40,52 +40,43 @@
             const vid = document.getElementById('vid');
             const hint = document.getElementById('hint');
             let started = false;
-            let audioCtx = null;
-            let source = null;
-            let gainNode = null;
-            let compressor = null;
-
-            function boostAudio() {
-                try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (!AudioContext) return;
-
-                    audioCtx = new AudioContext();
-                    
-                    source = audioCtx.createMediaElementSource(vid);
-                    
-                    gainNode = audioCtx.createGain();
-                    gainNode.gain.value = 4.0; 
-                    
-                    compressor = audioCtx.createDynamicsCompressor();
-                    compressor.threshold.value = -20; 
-                    compressor.ratio.value = 12; 
-                    
-                    source.connect(gainNode);
-                    gainNode.connect(compressor);
-                    compressor.connect(audioCtx.destination);
-                    
-                    vid.muted = false;
-                    vid.volume = 1;
-
-                } catch (e) {
-                    console.log("Ошибка Web Audio API (возможно, iOS Safari):", e);
-
-                    vid.muted = false;
-                    vid.volume = 1;
-                }
-            }
 
             function start() {
                 if (started) return;
                 started = true;
 
-                boostAudio();
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        const audioCtx = new AudioContext();
+                        const source = audioCtx.createMediaElementSource(vid);
+                        
+                        const gainNode = audioCtx.createGain();
+                        gainNode.gain.value = 10.0;
+                        
+                        const compressor = audioCtx.createDynamicsCompressor();
+                        compressor.threshold.value = -50; 
+                        compressor.knee.value = 40;
+                        compressor.ratio.value = 20; 
+                        compressor.attack.value = 0;
+                        compressor.release.value = 0.25;
 
+                        source.connect(gainNode);
+                        gainNode.connect(compressor);
+                        compressor.connect(audioCtx.destination);
+                        
+                        vid.muted = false;
+                        vid.volume = 1;
+                    }
+                } catch (e) {
+                    vid.muted = false;
+                    vid.volume = 1;
+                }
+
+                // Запуск видео
                 vid.play().then(() => {
                     hint.classList.add('hidden');
-                }).catch((error) => {
-                    console.log("Ошибка запуска:", error);
+                }).catch(() => {
                     vid.muted = true;
                     vid.play().then(() => {
                         vid.muted = false;
