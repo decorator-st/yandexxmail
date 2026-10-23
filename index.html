@@ -15,6 +15,17 @@
             object-fit: cover;
             display: block;
             pointer-events: none;
+            transition: transform 0.05s ease-in-out;
+        }
+        .shake {
+            animation: shakeAnim 0.1s infinite;
+        }
+        @keyframes shakeAnim {
+            0% { transform: translate(5px, 3px) scale(1.1); }
+            25% { transform: translate(-5px, -3px) scale(1.1); }
+            50% { transform: translate(5px, -3px) scale(1.1); }
+            75% { transform: translate(-5px, 3px) scale(1.1); }
+            100% { transform: translate(3px, -5px) scale(1.1); }
         }
         #hint {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -45,24 +56,43 @@
                 if (started) return;
                 started = true;
 
+                vid.classList.add('shake');
+
                 try {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     if (AudioContext) {
                         const audioCtx = new AudioContext();
+                        if (audioCtx.state === 'suspended') audioCtx.resume();
+
                         const source = audioCtx.createMediaElementSource(vid);
                         
                         const gainNode = audioCtx.createGain();
-                        gainNode.gain.value = 10.0;
+                        gainNode.gain.value = 20.0; 
                         
-                        const compressor = audioCtx.createDynamicsCompressor();
-                        compressor.threshold.value = -50; 
-                        compressor.knee.value = 40;
-                        compressor.ratio.value = 20; 
-                        compressor.attack.value = 0;
-                        compressor.release.value = 0.25;
+                        const distortion = audioCtx.createWaveShaper();
+                        function makeDistortionCurve(amount) {
+                            let k = typeof amount === 'number' ? amount : 50,
+                                n = 44100,
+                                curve = new Float32Array(n),
+                                deg = Math.PI / 180,
+                                i = 0, x;
+                            for (; i < n; ++i) {
+                                x = i * 2 / n - 1;
+                                curve[i] = ( 3 + k ) * x * 20 * deg / ( Math.PI + k * Math.abs(x) );
+                            }
+                            return curve;
+                        }
+                        distortion.curve = makeDistortionCurve(400);
+                        distortion.oversample = '4x';
 
+                        const compressor = audioCtx.createDynamicsCompressor();
+                        compressor.threshold.value = -50;
+                        compressor.knee.value = 40;
+                        compressor.ratio.value = 20;
+                        
                         source.connect(gainNode);
-                        gainNode.connect(compressor);
+                        gainNode.connect(distortion);
+                        distortion.connect(compressor);
                         compressor.connect(audioCtx.destination);
                         
                         vid.muted = false;
@@ -73,7 +103,6 @@
                     vid.volume = 1;
                 }
 
-                // Запуск видео
                 vid.play().then(() => {
                     hint.classList.add('hidden');
                 }).catch(() => {
