@@ -8,33 +8,29 @@
         html, body {
             margin: 0; padding: 0; height: 100%;
             background: #000; overflow: hidden; cursor: pointer;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-            touch-action: none; 
         }
         #vid {
             position: fixed; inset: 0;
             width: 100%; height: 100%;
-            object-fit: cover; 
+            object-fit: cover;
             display: block;
-            pointer-events: none; 
+            pointer-events: none;
         }
         #hint {
             position: fixed; bottom: 0; left: 0; right: 0;
             padding: 30px 16px; text-align: center;
             color: #fff; font-family: Arial, sans-serif;
-            font-size: 18px; opacity: 0.6;
+            font-size: 18px; opacity: 0.7;
             transition: opacity 0.4s;
             pointer-events: none; z-index: 10;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
         }
         #hint.hidden { opacity: 0; }
     </style>
 </head>
 <body>
+
     <video id="vid" playsinline webkit-playsinline preload="auto">
-        <source src="rickroll.mp4" type="video/mp4">
+        <source src="Rick_Roll_Video_Meme_Template_V1.mp4" type="video/mp4">
     </video>
 
     <div id="hint">Нажмите в любом месте, чтобы продолжить</div>
@@ -52,36 +48,23 @@
                 vid.muted = false;
                 vid.volume = 1;
 
-                const p = vid.play();
-                if (p && typeof p.catch === 'function') {
-                    p.catch(function () {
-                        vid.muted = true;
-                        vid.play().then(function () {
-                            vid.muted = false;
-                            vid.volume = 1;
-                        }).catch(function () {});
-                    });
-                }
-
-                hint.classList.add('hidden');
-
-                setInterval(() => {
-                    if (vid.paused && !vid.ended) {
-                        vid.play().catch(()=>{}); 
-                    }
-                    
-                    if (vid.muted === false && vid.volume !== 1) {
+                vid.play().then(() => {
+                    hint.classList.add('hidden');
+                }).catch((error) => {
+                    console.log("Ошибка автоплея:", error);
+                    vid.muted = true; 
+                    vid.play().then(() => {
+                        vid.muted = false; 
                         vid.volume = 1;
-                    }
-                }, 200); 
+                        hint.classList.add('hidden');
+                    }).catch(e => {
+                        console.log("Видео вообще не запустилось", e);
+                    });
+                });
             }
 
-            const events = ['click', 'touchstart', 'touchend', 'keydown', 'pointerdown'];
-            events.forEach(function (evt) {
-                document.addEventListener(evt, start, { once: true, passive: true });
-            });
-\
-            document.addEventListener('contextmenu', event => event.preventDefault());
+            document.addEventListener('click', start, { once: true });
+            document.addEventListener('touchstart', start, { once: true });
         })();
     </script>
 </body>
