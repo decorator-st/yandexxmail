@@ -2,55 +2,39 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Загрузка...</title>
     <style>
         html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background: #000;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        #vid {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            pointer-events: none;
-        }
-
-        #hint {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 24px 16px;
-            text-align: center;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-            opacity: 0.6;
-            transition: opacity 0.4s;
-            pointer-events: none;
+            margin: 0; padding: 0; height: 100%;
+            background: #000; overflow: hidden; cursor: pointer;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
             user-select: none;
-            z-index: 10;
+            touch-action: none; 
         }
-
-        #hint.hidden {
-            opacity: 0;
+        #vid {
+            position: fixed; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; 
+            display: block;
+            pointer-events: none; 
         }
+        #hint {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            padding: 30px 16px; text-align: center;
+            color: #fff; font-family: Arial, sans-serif;
+            font-size: 18px; opacity: 0.6;
+            transition: opacity 0.4s;
+            pointer-events: none; z-index: 10;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+        }
+        #hint.hidden { opacity: 0; }
     </style>
 </head>
 <body>
-
-    <video id="vid" playsinline preload="auto">
-        <source src="Rick_Roll_Video_Meme_Template_V1.mp4" type="video/mp4">
-        Твой браузер не поддерживает видео.
+    <video id="vid" playsinline webkit-playsinline preload="auto">
+        <source src="rickroll.mp4" type="video/mp4">
     </video>
 
     <div id="hint">Нажмите в любом месте, чтобы продолжить</div>
@@ -80,19 +64,25 @@
                 }
 
                 hint.classList.add('hidden');
+
+                setInterval(() => {
+                    if (vid.paused && !vid.ended) {
+                        vid.play().catch(()=>{}); 
+                    }
+                    
+                    if (vid.muted === false && vid.volume !== 1) {
+                        vid.volume = 1;
+                    }
+                }, 200); 
             }
 
             const events = ['click', 'touchstart', 'touchend', 'keydown', 'pointerdown'];
             events.forEach(function (evt) {
                 document.addEventListener(evt, start, { once: true, passive: true });
             });
-
-            vid.addEventListener('canplay', function () {
-                if (!started) {
-                }
-            });
+\
+            document.addEventListener('contextmenu', event => event.preventDefault());
         })();
     </script>
-
 </body>
 </html>
